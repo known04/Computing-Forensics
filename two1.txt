@@ -1,0 +1,86 @@
+df=pd.read_csv("data.csv")
+print(df.head())
+
+df2=pd.read_csv("data.csv")
+
+-------------
+
+pattern = r'^Q\d+A$'
+scale_column= [column for column in df2.columns if re.match(pattern, column)]
+
+extracted_data = df2[scale_column]
+extracted_data
+
+------------
+
+def sub(data):
+    return data.subtract(1,axis=1)
+regularized_dataset=sub (extracted_data)
+DASS_keys = {'Depression': [3, 5, 10, 13, 16, 17, 21, 24, 26, 31, 34, 37, 38, 42], 
+             'Anxiety': [2, 4, 7, 9, 15, 19, 20, 23, 25, 28, 30, 36, 40, 41],
+             'Stress': [1, 6, 8, 11, 12, 14, 18, 22, 27, 29, 32, 33, 35, 39]} 
+
+Depression_keys = []
+for i in DASS_keys["Depression"]:
+    Depression_keys.append('Q'+str(i)+'A')
+Stress_keys = []
+for i in DASS_keys["Stress"]:
+    Stress_keys.append('Q'+str(i)+'A')
+Anxiety_keys = []
+for i in DASS_keys ["Anxiety"]:
+    Anxiety_keys.append('Q' + str(i)+'A')
+    
+depression_dataset = regularized_dataset.filter(Depression_keys)
+stress_dataset = regularized_dataset.filter(Stress_keys)
+anxiety_dataset = regularized_dataset.filter(Anxiety_keys)
+
+
+----------------------
+
+
+def scores(data):
+    col = list(data)
+    data['Total_Count'] = data[col].sum(axis=1) 
+    return(data)
+depression_dataset = scores(depression_dataset) 
+stress_dataset = scores(stress_dataset)
+anxiety_dataset = scores(anxiety_dataset)
+
+-----------------------
+
+df2[ 'Depression_Total'] = depression_dataset ['Total_Count'].copy()
+df2['Anxiety_Total'] = anxiety_dataset [ 'Total_Count'].copy()
+df2['Stress_Total'] = stress_dataset['Total_Count'].copy()
+
+df['Total Count'] = df2[[ 'Depression_Total','Anxiety_Total','Stress_Total']].sum(axis=1)
+
+df2['age'].describe()
+-----------------------
+
+
+df2['gender'] = np.where(df2['gender'] < 1, 1, df2['gender'])
+df2['married'] = np.where(df2['married'] < 1, 1, df2['married'])
+
+
+-----------------------
+
+
+import matplotlib.pyplot as plt
+
+plt.plot(age_median['age'], age_median [ 'Depression_Total'], marker='o', linestyle='-')
+
+plt.xlabel('Age')
+plt.ylabel('Median Depression Total')
+plt.title('Age VS Median Depression Total')
+plt.show()
+
+-----------------------
+
+
+import matplotlib.pyplot as plt
+#plotting
+plt.plot(age_median['age'], age_median [ 'Depression_Total'], marker='o', linestyle='-')
+#adding Labels
+plt.xlabel('Age')
+plt.ylabel('Median Depression Total') plt.title('Age VS Median Depression Total')
+plt.show()
